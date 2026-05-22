@@ -18,8 +18,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
@@ -283,6 +285,197 @@
         @keyframes wave {
             0%, 100% { height: 10px; }
             50% { height: 25px; }
+        }
+
+        /* ========== 移动端适配 ========== */
+
+        /* 平板设备 */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .card {
+                padding: 40px 50px;
+                border-radius: 25px;
+            }
+
+            .title {
+                font-size: 2.5em;
+            }
+
+            .subtitle {
+                font-size: 1.5em;
+            }
+
+            .message {
+                font-size: 1.2em;
+            }
+
+            .emoji {
+                font-size: 3em;
+            }
+        }
+
+        /* 手机设备 */
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 15px;
+                align-items: flex-start;
+                padding-top: 80px;
+            }
+
+            .container {
+                padding: 10px;
+                width: 100%;
+            }
+
+            .card {
+                padding: 30px 25px;
+                border-radius: 20px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+                margin-bottom: 20px;
+            }
+
+            .title {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            .subtitle {
+                font-size: 1.2em;
+                margin-bottom: 20px;
+            }
+
+            .message {
+                font-size: 1em;
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+
+            .message p {
+                margin-bottom: 8px;
+            }
+
+            .emoji {
+                font-size: 2.5em;
+            }
+
+            .heart {
+                font-size: 1.6em;
+            }
+
+            .footer {
+                font-size: 0.95em;
+                margin-top: 20px;
+            }
+
+            /* 音乐按钮适配 */
+            .music-btn {
+                width: 50px;
+                height: 50px;
+                top: 15px;
+                right: 15px;
+            }
+
+            .music-btn i {
+                font-size: 20px;
+            }
+
+            .music-hint {
+                top: 75px;
+                right: 15px;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            /* 波形适配 */
+            .music-waves {
+                bottom: 15px;
+            }
+
+            .wave {
+                width: 3px;
+                height: 15px;
+            }
+
+            /* 减少气球数量和大小 */
+            .balloon {
+                width: 35px;
+                height: 45px;
+            }
+
+            /* 减少动画性能消耗 */
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+        }
+
+        /* 小屏手机 */
+        @media screen and (max-width: 360px) {
+            body {
+                padding: 10px;
+                padding-top: 70px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .title {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            .message {
+                font-size: 0.95em;
+            }
+
+            .emoji {
+                font-size: 2em;
+            }
+        }
+
+        /* 横屏模式 */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding-top: 20px;
+                align-items: center;
+            }
+
+            .card {
+                padding: 25px 40px;
+            }
+
+            .title {
+                font-size: 2em;
+            }
+
+            .message {
+                font-size: 1em;
+            }
+        }
+
+        /* 安全区域适配（iPhone X 及以上） */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-bottom: max(15px, env(safe-area-inset-bottom));
+            }
+
+            .music-btn {
+                top: max(15px, env(safe-area-inset-top));
+                right: max(15px, env(safe-area-inset-right));
+            }
+
+            .music-hint {
+                top: max(75px, calc(env(safe-area-inset-top) + 60px));
+            }
         }
     </style>
 </head>
