@@ -545,9 +545,9 @@
         const musicHint = document.getElementById('musicHint');
         let isPlaying = false;
 
-        // 使用更欢快的音乐 URL
-        bgMusic.src = 'https://assets.mixkit.co/music/preview/mixkit-games-worldbeat-432.mp3';
-        bgMusic.volume = 0.5;
+        // 使用本地音乐文件
+        bgMusic.src = encodeURI('轻松童趣天真可爱配乐 by 猪圈里的人-完整版.mp3');
+        bgMusic.volume = 0.6;
 
         function toggleMusic() {
             if (isPlaying) {
