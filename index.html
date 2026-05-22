@@ -321,12 +321,14 @@
         @media screen and (max-width: 480px) {
             body {
                 padding: 15px;
-                align-items: flex-start;
                 padding-top: 80px;
+                padding-bottom: 50px;
+                align-items: flex-start;
             }
 
             .container {
                 padding: 10px;
+                padding-bottom: 30px;
                 width: 100%;
             }
 
@@ -334,7 +336,7 @@
                 padding: 30px 25px;
                 border-radius: 20px;
                 box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-                margin-bottom: 20px;
+                margin-bottom: 30px;
             }
 
             .title {
@@ -465,7 +467,11 @@
             body {
                 padding-left: max(15px, env(safe-area-inset-left));
                 padding-right: max(15px, env(safe-area-inset-right));
-                padding-bottom: max(15px, env(safe-area-inset-bottom));
+                padding-bottom: max(50px, env(safe-area-inset-bottom));
+            }
+
+            .container {
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
             }
 
             .music-btn {
