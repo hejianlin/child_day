@@ -665,6 +665,153 @@
                 top: max(75px, calc(env(safe-area-inset-top) + 60px));
             }
         }
+
+        /* ========== 刮刮乐模块 ========== */
+        .scratch-section {
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease 0.6s, transform 0.8s ease 0.6s;
+        }
+
+        .scratch-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scratch-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .scratch-title {
+            font-size: 1.1em;
+            color: #e91e63;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .scratch-container {
+            position: relative;
+            width: 280px;
+            height: 100px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .scratch-prize {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fff9e6, #fff5d6);
+            font-size: 1em;
+            color: #d4380d;
+            text-align: center;
+            padding: 10px 15px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .scratch-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #8b6914;
+            font-size: 0.85em;
+            text-align: center;
+            pointer-events: none;
+            z-index: 5;
+            text-shadow: 0 0 2px rgba(255,255,255,0.5);
+            white-space: nowrap;
+        }
+
+        .scratch-hint.hidden {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 爱心飘落动画 */
+        .heart-fall {
+            position: fixed;
+            top: -20px;
+            font-size: 1.5em;
+            animation: heartFall 3s linear forwards;
+            pointer-events: none;
+            z-index: 1500;
+        }
+
+        @keyframes heartFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 刮刮乐移动端适配 */
+        @media screen and (max-width: 480px) {
+            .scratch-section {
+                margin-top: 20px;
+            }
+
+            .scratch-card {
+                padding: 15px;
+                max-width: 280px;
+            }
+
+            .scratch-container {
+                width: 240px;
+                height: 90px;
+            }
+
+            .scratch-title {
+                font-size: 1em;
+                margin-bottom: 12px;
+            }
+
+            .scratch-prize {
+                font-size: 0.9em;
+            }
+
+            .scratch-hint {
+                font-size: 0.75em;
+            }
+        }
+
+        @media screen and (max-width: 360px) {
+            .scratch-card {
+                max-width: 240px;
+                padding: 12px;
+            }
+
+            .scratch-container {
+                width: 200px;
+                height: 80px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -724,6 +871,18 @@
                 <p class="date">2025.06.01</p>
             </div>
         </div>
+
+        <!-- 刮刮乐抽奖区域 -->
+        <div class="scratch-section" id="scratchSection">
+            <div class="scratch-card">
+                <div class="scratch-title">🎁 幸运刮刮乐</div>
+                <div class="scratch-container" id="scratchContainer">
+                    <div class="scratch-prize" id="scratchPrize"></div>
+                    <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+                    <div class="scratch-hint" id="scratchHint">✨ 刮一刮，解锁何先生专属六一惊喜</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -772,6 +931,9 @@
 
             // 显示波形
             musicWaves.classList.add('active');
+
+            // 初始化刮刮乐（延迟确保动画完成）
+            setTimeout(initScratchCard, 500);
         }
 
         // 显示音乐提示
@@ -842,6 +1004,198 @@
         // 初始化
         createStars();
         createBalloons();
+
+        // ========== 刮刮乐功能 ==========
+        const prizes = [
+            '恭喜中奖🎉 何先生专属暖心拥抱×1',
+            '中奖啦✨ 不限次奶茶甜品兑换券一张',
+            '超幸运✨ 专属惊喜红包，找何先生兑现哦～'
+        ];
+
+        const scratchSection = document.getElementById('scratchSection');
+        const scratchContainer = document.getElementById('scratchContainer');
+        const scratchCanvas = document.getElementById('scratchCanvas');
+        const scratchPrize = document.getElementById('scratchPrize');
+        const scratchHint = document.getElementById('scratchHint');
+
+        let ctx = null;
+        let isDrawing = false;
+        let scratchOpened = false;
+
+        // 随机选择奖品
+        function selectPrize() {
+            const randomIndex = Math.floor(Math.random() * prizes.length);
+            return prizes[randomIndex];
+        }
+
+        // 初始化刮刮乐
+        function initScratchCard() {
+            // 设置奖品
+            scratchPrize.textContent = selectPrize();
+
+            // 先显示刮刮乐区域
+            scratchSection.classList.add('visible');
+
+            // 等待元素渲染完成后设置canvas
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    const containerWidth = scratchContainer.offsetWidth;
+                    const containerHeight = scratchContainer.offsetHeight;
+
+                    // 确保尺寸有效
+                    if (containerWidth === 0 || containerHeight === 0) {
+                        console.log('容器尺寸为0，使用默认值');
+                        scratchCanvas.width = 280;
+                        scratchCanvas.height = 100;
+                    } else {
+                        scratchCanvas.width = containerWidth;
+                        scratchCanvas.height = containerHeight;
+                    }
+
+                    ctx = scratchCanvas.getContext('2d');
+
+                    // 绘制金色磨砂涂层
+                    const gradient = ctx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
+                    gradient.addColorStop(0, '#ffd700');
+                    gradient.addColorStop(0.3, '#ffec8b');
+                    gradient.addColorStop(0.5, '#ffd700');
+                    gradient.addColorStop(0.7, '#daa520');
+                    gradient.addColorStop(1, '#ffd700');
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+                    // 添加磨砂纹理
+                    ctx.globalAlpha = 0.1;
+                    for (let i = 0; i < 500; i++) {
+                        ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#b8860b';
+                        ctx.fillRect(
+                            Math.random() * scratchCanvas.width,
+                            Math.random() * scratchCanvas.height,
+                            Math.random() * 3,
+                            Math.random() * 3
+                        );
+                    }
+                    ctx.globalAlpha = 1;
+                }, 100);
+            });
+        }
+
+        // 刮开效果
+        function scratch(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 计算刮开比例
+        function getScratchPercentage() {
+            const imageData = ctx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+            let transparentPixels = 0;
+            for (let i = 3; i < imageData.data.length; i += 4) {
+                if (imageData.data[i] < 128) {
+                    transparentPixels++;
+                }
+            }
+            return transparentPixels / (imageData.data.length / 4);
+        }
+
+        // 显示爱心飘落动画
+        function showHeartFall() {
+            const hearts = ['❤️', '💕', '💗', '💖', '💝', '💘'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-fall';
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    heart.style.fontSize = (1 + Math.random() * 1) + 'em';
+                    document.body.appendChild(heart);
+
+                    setTimeout(() => heart.remove(), 4000);
+                }, i * 150);
+            }
+        }
+
+        // 检查是否刮开完成
+        function checkScratchComplete() {
+            if (scratchOpened) return;
+
+            const percentage = getScratchPercentage();
+            if (percentage > 0.4) {
+                scratchOpened = true;
+                scratchHint.classList.add('hidden');
+
+                // 清除剩余涂层
+                ctx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+                // 触发爱心飘落
+                setTimeout(showHeartFall, 200);
+            }
+        }
+
+        // 获取事件坐标
+        function getEventPos(e) {
+            const rect = scratchCanvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        // 鼠标事件
+        scratchCanvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const pos = getEventPos(e);
+            scratch(pos.x, pos.y);
+        });
+
+        scratchCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const pos = getEventPos(e);
+            scratch(pos.x, pos.y);
+            checkScratchComplete();
+        });
+
+        scratchCanvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        scratchCanvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // 触摸事件
+        scratchCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getEventPos(e);
+            scratch(pos.x, pos.y);
+        });
+
+        scratchCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const pos = getEventPos(e);
+            scratch(pos.x, pos.y);
+            checkScratchComplete();
+        });
+
+        scratchCanvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
     </script>
 </body>
 </html>
