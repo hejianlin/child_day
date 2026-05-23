@@ -669,7 +669,7 @@
 </head>
 <body>
     <!-- 背景音乐 - 欢快的儿童节音乐 -->
-    <audio id="bgMusic" loop preload="none">
+    <audio id="bgMusic" loop preload="auto">
     </audio>
 
     <!-- 礼物盒遮罩层 -->
@@ -740,6 +740,7 @@
         // 使用30秒片段循环播放
         bgMusic.src = 'music_30s.mp3';
         bgMusic.volume = 0.6;
+        bgMusic.load(); // 预加载音频
 
         // 点击礼物盒打开
         giftOverlay.addEventListener('click', openGift);
@@ -764,11 +765,24 @@
                 musicBtn.classList.add('playing');
                 musicWaves.classList.add('active');
             }).catch(err => {
+                // 自动播放失败，显示提示让用户手动点击
                 console.log('自动播放失败，请点击音乐按钮播放');
+                showMusicHint();
             });
 
             // 显示波形
             musicWaves.classList.add('active');
+        }
+
+        // 显示音乐提示
+        function showMusicHint() {
+            const hint = document.createElement('div');
+            hint.className = 'music-hint';
+            hint.innerHTML = '🎵 点击播放音乐';
+            hint.style.display = 'block';
+            hint.style.animation = 'fadeInOut 4s ease-in-out';
+            document.body.appendChild(hint);
+            setTimeout(() => hint.remove(), 4000);
         }
 
         function toggleMusic() {
@@ -778,10 +792,13 @@
                 musicBtn.classList.remove('playing');
                 musicWaves.classList.remove('active');
             } else {
-                bgMusic.play();
-                musicIcon.className = 'fas fa-pause';
-                musicBtn.classList.add('playing');
-                musicWaves.classList.add('active');
+                bgMusic.play().then(() => {
+                    musicIcon.className = 'fas fa-pause';
+                    musicBtn.classList.add('playing');
+                    musicWaves.classList.add('active');
+                }).catch(err => {
+                    console.log('播放失败');
+                });
             }
             isPlaying = !isPlaying;
         }
